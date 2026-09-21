@@ -142,28 +142,16 @@ public class PrestamoServiceSteps extends CucumberSpringConfiguration {
         prestamoCreado = prestamoService.prestarLibro(usuarioId, libroId);
     }
 
-    @Cuando("calculo el recargo A para un préstamo nulo")
+    @Cuando("calculo el recargo para un préstamo nulo")
     public void calcularRecargoANulo() {
-        resultadoCalculo = prestamoService.calcularRecargoA(null);
+        resultadoCalculo = prestamoService.calcularRecargo(null);
     }
 
-    @Cuando("calculo el recargo A para un préstamo de hace {int} días")
+    @Cuando("calculo el recargo para un préstamo de hace {int} días")
     public void calcularRecargoAConDias(int dias) {
         Prestamo p = new Prestamo();
         p.setFechaPrestamo(LocalDate.now().minusDays(dias));
-        resultadoCalculo = prestamoService.calcularRecargoA(p);
-    }
-
-    @Cuando("calculo el recargo B para un préstamo nulo")
-    public void calcularRecargoBNulo() {
-        resultadoCalculo = prestamoService.calcularRecargoB(null);
-    }
-
-    @Cuando("calculo el recargo B para un préstamo de hace {int} días")
-    public void calcularRecargoBConDias(int dias) {
-        Prestamo p = new Prestamo();
-        p.setFechaPrestamo(LocalDate.now().minusDays(dias));
-        resultadoCalculo = prestamoService.calcularRecargoB(p);
+        resultadoCalculo = prestamoService.calcularRecargo(p);
     }
 
     @Cuando("intento devolver el préstamo con id {long}")
@@ -178,20 +166,6 @@ public class PrestamoServiceSteps extends CucumberSpringConfiguration {
     @Cuando("devuelvo el préstamo con id {long}")
     public void devolverLibroExito(Long id) {
         prestamoService.devolverLibro(id);
-    }
-
-    @Cuando("intento devolver un préstamo antiguo con id {long}")
-    public void intentoDevolverLibroAntiguo(Long id) {
-        try {
-            prestamoService.devolverLibroAntiguo(id);
-        } catch (Exception e) {
-            excepcionCapturada = e;
-        }
-    }
-
-    @Cuando("devuelvo el préstamo antiguo con id {long}")
-    public void devolverLibroAntiguoExito(Long id) {
-        prestamoService.devolverLibroAntiguo(id);
     }
 
     @Cuando("calculo la multa para un préstamo nulo")
@@ -237,13 +211,8 @@ public class PrestamoServiceSteps extends CucumberSpringConfiguration {
         assertTrue(prestamoCreado.getLibro().isPrestado());
     }
 
-    @Entonces("el recargo A devuelto es {double}")
-    public void verificarRecargoA(double esperado) {
-        assertEquals(esperado, resultadoCalculo, 0.01);
-    }
-
-    @Entonces("el recargo B devuelto es {double}")
-    public void verificarRecargoB(double esperado) {
+    @Entonces("el recargo devuelto es {double}")
+    public void verificarRecargo(double esperado) {
         assertEquals(esperado, resultadoCalculo, 0.01);
     }
 
