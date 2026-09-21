@@ -24,7 +24,7 @@ public class Usuario {
 
     private boolean moroso;
 
-    @OneToMany
+    @OneToMany(mappedBy = "usuario")
     private List<Prestamo> prestamos = new ArrayList<>();
 
     public Usuario() {
