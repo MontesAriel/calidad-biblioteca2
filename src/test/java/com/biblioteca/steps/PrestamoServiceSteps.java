@@ -40,18 +40,10 @@ public class PrestamoServiceSteps extends CucumberSpringConfiguration {
     private double resultadoCalculo;
     private List<Prestamo> listaPrestamos;
 
-    // Estos tres mapas guardan la relacion entre el numero que aparece en el feature
-    // (por ejemplo el usuario 10, el libro 20) y el id real que le puso la base de datos
-    // cuando lo guardamos. Los necesitamos porque dejamos que sea Hibernate el que
-    // asigne el id, ya no lo ponemos nosotros a mano como antes.
     private final Map<Long, Long> idsUsuarios = new HashMap<>();
     private final Map<Long, Long> idsLibros = new HashMap<>();
     private final Map<Long, Long> idsPrestamos = new HashMap<>();
 
-    // Si el numero del feature no aparece en el mapa es porque ese escenario
-    // nunca creo ese usuario a proposito (por ejemplo el caso de usuario id 999
-    // que prueba que no existe), entonces devolvemos el mismo numero tal cual
-    // porque total nunca va a coincidir con nada real en la base.
     private long resolverUsuario(Long idFeature) {
         return idsUsuarios.getOrDefault(idFeature, idFeature);
     }
@@ -99,7 +91,6 @@ public class PrestamoServiceSteps extends CucumberSpringConfiguration {
         Usuario guardado = usuarioRepository.save(usuario);
         idsUsuarios.put(idFeature, guardado.getId());
 
-        // Le creamos tres prestamos ya guardados para simular que llego al limite
         List<Prestamo> prestamos = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
             Prestamo p = new Prestamo();
@@ -156,8 +147,6 @@ public class PrestamoServiceSteps extends CucumberSpringConfiguration {
         Prestamo guardado = prestamoRepository.save(prestamo);
         idsPrestamos.put(idFeature, guardado.getId());
     }
-
-    // --- ACA HACEMOS LAS ACCIONES (LOS "CUANDO") ---
 
     @Cuando("intento prestar un libro con usuario id {long} y libro id {long}")
     public void intentoPrestarLibro(Long usuarioIdFeature, Long libroIdFeature) {
@@ -227,8 +216,6 @@ public class PrestamoServiceSteps extends CucumberSpringConfiguration {
         listaPrestamos = prestamoService.listarPrestamos();
     }
 
-    // --- ACA VERIFICAMOS QUE TODO HAYA SALIDO COMO ESPERABAMOS (LOS "ENTONCES") ---
-
     @Entonces("se lanza una excepción en prestamo con mensaje {string}")
     public void verificarExcepcion(String mensajeEsperado) {
         assertNotNull(excepcionCapturada, "Se esperaba una excepción pero no ocurrió.");
@@ -242,12 +229,17 @@ public class PrestamoServiceSteps extends CucumberSpringConfiguration {
         assertTrue(prestamoCreado.getLibro().isPrestado());
     }
 
-    // Recibimos el valor esperado como texto y lo convertimos nosotros mismos con
-    // parseDouble, para que no importe si el sistema esta configurado en español
-    // o en ingles. Antes usabamos {double} directo y por el idioma del feature
-    // el punto se interpretaba mal, por eso venia fallando (ver punto 2.1 del informe).
     @Entonces("el recargo devuelto es {string}")
     public void verificarRecargo(String esperadoTexto) {
+        verificarValorEsperado(esperadoTexto);
+    }
+
+    @Entonces("la multa devuelta es {string}")
+    public void verificarMulta(String esperadoTexto) {
+        verificarValorEsperado(esperadoTexto);
+    }
+
+    private void verificarValorEsperado(String esperadoTexto) {
         double esperado = Double.parseDouble(esperadoTexto);
         assertEquals(esperado, resultadoCalculo, 0.01);
     }
@@ -257,11 +249,6 @@ public class PrestamoServiceSteps extends CucumberSpringConfiguration {
         assertNull(excepcionCapturada);
     }
 
-    @Entonces("la multa devuelta es {string}")
-    public void verificarMulta(String esperadoTexto) {
-        double esperado = Double.parseDouble(esperadoTexto);
-        assertEquals(esperado, resultadoCalculo, 0.01);
-    }
 
     @Entonces("la lista de préstamos devuelta no es nula")
     public void verificarListaPrestamos() {
