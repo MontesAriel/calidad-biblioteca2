@@ -110,4 +110,10 @@ public class LibroServiceSteps extends CucumberSpringConfiguration {
     public void eliminarPorIdGenerado() {
         libroService.eliminarLibro(idGenerado);
     }
+
+    @Entonces("al buscar ese ID el resultado es nulo")
+    public void verificarLibroEliminado() {
+        Libro resultado = libroService.buscarLibro(idGenerado);
+        assertNull(resultado);
+    }
 }
